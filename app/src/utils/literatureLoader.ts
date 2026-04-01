@@ -1,23 +1,7 @@
 // app/src/utils/literatureLoader.ts
-interface LiteratureItem {
-  id: string;
-  title: string;
-  titleEn: string;
-  authors: string[];
-  abstract: string;
-  abstractEn: string;
-  publication: string;
-  year: number;
-  volume: string;
-  issue: string;
-  pages: string;
-  doi: string;
-  pmid: string;
-  keywords: string[];
-  keywordsEn: string[];
-  itemType: string;
-  language: string;
-}
+import type { Literature } from '../types/literature';
+
+type LiteratureItem = Literature;
 
 interface Manifest {
   total: number;
