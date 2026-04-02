@@ -35,40 +35,49 @@ export function LiteratureSearch({ initialQuery = '', onSelectLiterature }: Lite
   // 初始化加载
   useEffect(() => {
     const init = async () => {
-      await literatureLoader.init();
-      setTotalPages(literatureLoader.manifest?.pages || 0);
-      
-      // 加载第一页
-      const firstPage = await literatureLoader.getFirstPage();
-      setPageData(firstPage);
-      setAllData(firstPage);
-      setLoading(false);
-      
-      // 后台加载所有数据用于搜索
-      loadAllDataForSearch();
+      try {
+        setLoading(true);
+        await literatureLoader.init();
+        setTotalPages(literatureLoader.manifest?.pages || 0);
+        
+        // 加载第一页
+        const firstPage = await literatureLoader.getFirstPage();
+        setPageData(firstPage);
+        setLoading(false);
+        
+        // 后台加载所有数据用于搜索（使用新的 getAllData 方法）
+        loadAllDataForSearch();
+      } catch (error) {
+        console.error('初始化失败:', error);
+        setLoading(false);
+      }
     };
     init();
   }, []);
 
   // 后台加载所有数据（用于搜索）
   const loadAllDataForSearch = async () => {
-    const all: Literature[] = [];
-    const total = literatureLoader.manifest?.pages || 0;
-    
-    for (let i = 1; i <= total; i++) {
-      const page = await literatureLoader.getPage(i);
-      all.push(...page);
+    try {
+      // 使用 literatureLoader 的 getAllData 方法（需要在 literatureLoader.ts 中添加）
+      const all = await literatureLoader.getAllData();
+      console.log(`Loaded ${all.length} items for search`);
+      setAllData(all);
+    } catch (error) {
+      console.error('Error loading all data:', error);
+      // 如果 getAllData 失败，使用备用方案
+      const all: Literature[] = [];
+      const total = literatureLoader.manifest?.pages || 0;
+      
+      for (let i = 1; i <= total; i++) {
+        try {
+          const page = await literatureLoader.getPage(i);
+          all.push(...page);
+        } catch (err) {
+          console.warn(`Failed to load page ${i}:`, err);
+        }
+      }
+      setAllData(all);
     }
-    setAllData(all);
-  };
-
-  // 加载指定页
-  const loadPage = async (page: number) => {
-    setLoading(true);
-    const data = await literatureLoader.getPage(page);
-    setPageData(data);
-    setCurrentPage(page);
-    setLoading(false);
   };
 
   // 搜索过滤（在所有数据中搜索）
