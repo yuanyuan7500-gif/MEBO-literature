@@ -45,7 +45,7 @@ export function LiteratureSearch({ initialQuery = '', onSelectLiterature }: Lite
         setPageData(firstPage);
         setLoading(false);
         
-        // 后台加载所有数据用于搜索（使用新的 getAllData 方法）
+        // 后台加载所有数据用于搜索
         loadAllDataForSearch();
       } catch (error) {
         console.error('初始化失败:', error);
@@ -58,13 +58,12 @@ export function LiteratureSearch({ initialQuery = '', onSelectLiterature }: Lite
   // 后台加载所有数据（用于搜索）
   const loadAllDataForSearch = async () => {
     try {
-      // 使用 literatureLoader 的 getAllData 方法（需要在 literatureLoader.ts 中添加）
       const all = await literatureLoader.getAllData();
       console.log(`Loaded ${all.length} items for search`);
       setAllData(all);
     } catch (error) {
       console.error('Error loading all data:', error);
-      // 如果 getAllData 失败，使用备用方案
+      // 备用方案
       const all: Literature[] = [];
       const total = literatureLoader.manifest?.pages || 0;
       
@@ -119,12 +118,12 @@ export function LiteratureSearch({ initialQuery = '', onSelectLiterature }: Lite
       results = results.filter(item => item.isOA === filters.isOA);
     }
 
-    // 年份范围过滤
-    if (typeof filters.yearStart === 'number') {
-      results = results.filter(item => item.year >= filters.yearStart);
+    // 年份范围过滤 - 修复 TypeScript 错误
+    if (filters.yearStart !== undefined && filters.yearStart !== null) {
+      results = results.filter(item => item.year >= filters.yearStart!);
     }
-    if (typeof filters.yearEnd === 'number') {
-      results = results.filter(item => item.year <= filters.yearEnd);
+    if (filters.yearEnd !== undefined && filters.yearEnd !== null) {
+      results = results.filter(item => item.year <= filters.yearEnd!);
     }
     // 按年份降序排序（新的在前）
     results.sort((a, b) => (b.year || 0) - (a.year || 0));
