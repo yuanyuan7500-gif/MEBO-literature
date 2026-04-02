@@ -1,8 +1,6 @@
 // app/src/utils/literatureLoader.ts
 import type { Literature } from '../types/literature';
 
-type LiteratureItem = Literature;
-
 interface Manifest {
   total: number;
   pages: number;
@@ -12,8 +10,10 @@ interface Manifest {
 
 class LiteratureLoader {
   private db: IDBDatabase | null = null;
-  private cache = new Map<number, LiteratureItem[]>();
+  private cache = new Map<number, Literature[]>();  // 改为 Literature
+  private allDataCache: Literature[] | null = null;  // 改为 Literature
   public manifest: Manifest | null = null;
+  private dataLoaded = false;
 
   // 初始化：打开数据库，加载清单
   async init(): Promise<void> {
@@ -27,12 +27,12 @@ class LiteratureLoader {
   }
 
   // 获取首页数据（首屏用）
-  async getFirstPage(): Promise<LiteratureItem[]> {
+  async getFirstPage(): Promise<Literature[]> {  // 改为 Literature
     return this.getPage(1);
   }
 
   // 获取指定页
-  async getPage(pageNum: number): Promise<LiteratureItem[]> {
+  async getPage(pageNum: number): Promise<Literature[]> {  // 改为 Literature
     // 1. 检查内存缓存
     if (this.cache.has(pageNum)) {
       return this.cache.get(pageNum)!;
@@ -47,7 +47,7 @@ class LiteratureLoader {
 
     // 3. 网络请求
     const res = await fetch(`/data/page-${pageNum}.json`);
-    const data: LiteratureItem[] = await res.json();
+    const data: Literature[] = await res.json();  // 改为 Literature
     
     // 存入缓存
     this.cache.set(pageNum, data);
@@ -57,9 +57,9 @@ class LiteratureLoader {
   }
 
   // 搜索功能（在所有数据中搜索）
-  async search(keyword: string): Promise<LiteratureItem[]> {
+  async search(keyword: string): Promise<Literature[]> {  // 改为 Literature
     const lowerKeyword = keyword.toLowerCase();
-    const results: LiteratureItem[] = [];
+    const results: Literature[] = [];  // 改为 Literature
     
     // 加载所有页并搜索（实际使用时可优化）
     if (!this.manifest) return results;
@@ -79,7 +79,7 @@ class LiteratureLoader {
   }
 
   // 根据 ID 获取单条
-  async getById(id: string): Promise<LiteratureItem | null> {
+  async getById(id: string): Promise<Literature | null> {  // 改为 Literature
     if (!this.manifest) return null;
     
     for (let i = 1; i <= this.manifest.pages; i++) {
@@ -88,6 +88,18 @@ class LiteratureLoader {
       if (item) return item;
     }
     return null;
+  }
+
+  // 新增：获取所有数据（用于 LiteratureSearch 组件）
+  async getAllData(): Promise<Literature[]> {  // 改为 Literature
+    if (!this.manifest) return [];
+    
+    const all: Literature[] = [];  // 改为 Literature
+    for (let i = 1; i <= this.manifest.pages; i++) {
+      const page = await this.getPage(i);
+      all.push(...page);
+    }
+    return all;
   }
 
   // 后台预加载完整数据
@@ -102,7 +114,7 @@ class LiteratureLoader {
     
     try {
       const res = await fetch('/data/literature-full.json');
-      const data: LiteratureItem[] = await res.json();
+      const data: Literature[] = await res.json();  // 改为 Literature
       
       // 分批存入，避免阻塞
       const batchSize = 500;
