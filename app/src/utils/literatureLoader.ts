@@ -10,10 +10,8 @@ interface Manifest {
 
 class LiteratureLoader {
   private db: IDBDatabase | null = null;
-  private cache = new Map<number, Literature[]>();  // 改为 Literature
-  private allDataCache: Literature[] | null = null;  // 改为 Literature
+  private cache = new Map<number, Literature[]>();
   public manifest: Manifest | null = null;
-  private dataLoaded = false;
 
   // 初始化：打开数据库，加载清单
   async init(): Promise<void> {
@@ -27,12 +25,12 @@ class LiteratureLoader {
   }
 
   // 获取首页数据（首屏用）
-  async getFirstPage(): Promise<Literature[]> {  // 改为 Literature
+  async getFirstPage(): Promise<Literature[]> {
     return this.getPage(1);
   }
 
   // 获取指定页
-  async getPage(pageNum: number): Promise<Literature[]> {  // 改为 Literature
+  async getPage(pageNum: number): Promise<Literature[]> {
     // 1. 检查内存缓存
     if (this.cache.has(pageNum)) {
       return this.cache.get(pageNum)!;
@@ -47,7 +45,7 @@ class LiteratureLoader {
 
     // 3. 网络请求
     const res = await fetch(`/data/page-${pageNum}.json`);
-    const data: Literature[] = await res.json();  // 改为 Literature
+    const data: Literature[] = await res.json();
     
     // 存入缓存
     this.cache.set(pageNum, data);
@@ -57,9 +55,9 @@ class LiteratureLoader {
   }
 
   // 搜索功能（在所有数据中搜索）
-  async search(keyword: string): Promise<Literature[]> {  // 改为 Literature
+  async search(keyword: string): Promise<Literature[]> {
     const lowerKeyword = keyword.toLowerCase();
-    const results: Literature[] = [];  // 改为 Literature
+    const results: Literature[] = [];
     
     // 加载所有页并搜索（实际使用时可优化）
     if (!this.manifest) return results;
@@ -79,7 +77,7 @@ class LiteratureLoader {
   }
 
   // 根据 ID 获取单条
-  async getById(id: string): Promise<Literature | null> {  // 改为 Literature
+  async getById(id: string): Promise<Literature | null> {
     if (!this.manifest) return null;
     
     for (let i = 1; i <= this.manifest.pages; i++) {
@@ -90,11 +88,11 @@ class LiteratureLoader {
     return null;
   }
 
-  // 新增：获取所有数据（用于 LiteratureSearch 组件）
-  async getAllData(): Promise<Literature[]> {  // 改为 Literature
+  // 获取所有数据（用于 LiteratureSearch 组件）
+  async getAllData(): Promise<Literature[]> {
     if (!this.manifest) return [];
     
-    const all: Literature[] = [];  // 改为 Literature
+    const all: Literature[] = [];
     for (let i = 1; i <= this.manifest.pages; i++) {
       const page = await this.getPage(i);
       all.push(...page);
@@ -114,7 +112,7 @@ class LiteratureLoader {
     
     try {
       const res = await fetch('/data/literature-full.json');
-      const data: Literature[] = await res.json();  // 改为 Literature
+      const data: Literature[] = await res.json();
       
       // 分批存入，避免阻塞
       const batchSize = 500;
